@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    service_name: str = "product-service"
+    service_name: str = "catalog"
     app_version: str = "v1"
     app_port: int = 8001
     otlp_endpoint: str = "http://localhost:4317"

@@ -11,13 +11,13 @@ async def health():
 
 @router.get("/ready")
 async def ready():
-    # product-service 연결 가능 여부 확인
+    # catalog 연결 가능 여부 확인
     import httpx
     try:
         async with httpx.AsyncClient(timeout=2.0) as client:
-            resp = await client.get(f"{settings.product_service_url}/health")
+            resp = await client.get(f"{settings.catalog_url}/health")
             resp.raise_for_status()
         return {"status": "ready", "version": settings.app_version, "service": settings.service_name}
     except Exception:
         from fastapi import HTTPException
-        raise HTTPException(status_code=503, detail="product-service unreachable")
+        raise HTTPException(status_code=503, detail="catalog unreachable")

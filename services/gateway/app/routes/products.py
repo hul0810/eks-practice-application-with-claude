@@ -45,14 +45,14 @@ async def _proxy(method: str, url: str, request: Request) -> Response:
 
 @router.get("")
 async def list_products(request: Request):
-    return await _proxy("GET", f"{settings.product_service_url}/api/v1/products", request)
+    return await _proxy("GET", f"{settings.catalog_url}/api/v1/products", request)
 
 
 @router.get("/{product_id}")
 async def get_product(product_id: str, request: Request):
-    return await _proxy("GET", f"{settings.product_service_url}/api/v1/products/{product_id}", request)
+    return await _proxy("GET", f"{settings.catalog_url}/api/v1/products/{product_id}", request)
 
 
 @router.post("")
 async def create_product(request: Request):
-    return await _proxy("POST", f"{settings.product_service_url}/api/v1/products", request)
+    return await _proxy("POST", f"{settings.catalog_url}/api/v1/products", request)

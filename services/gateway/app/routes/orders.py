@@ -42,14 +42,14 @@ async def _proxy(method: str, url: str, request: Request) -> Response:
 
 @router.get("")
 async def list_orders(request: Request):
-    return await _proxy("GET", f"{settings.order_service_url}/api/v1/orders", request)
+    return await _proxy("GET", f"{settings.order_url}/api/v1/orders", request)
 
 
 @router.get("/{order_id}")
 async def get_order(order_id: str, request: Request):
-    return await _proxy("GET", f"{settings.order_service_url}/api/v1/orders/{order_id}", request)
+    return await _proxy("GET", f"{settings.order_url}/api/v1/orders/{order_id}", request)
 
 
 @router.post("")
 async def create_order(request: Request):
-    return await _proxy("POST", f"{settings.order_service_url}/api/v1/orders", request)
+    return await _proxy("POST", f"{settings.order_url}/api/v1/orders", request)

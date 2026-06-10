@@ -3,9 +3,9 @@ networks:
     driver: bridge
 
 services:
-  product-service:
+  catalog:
     build:
-      context: ./services/product-service
+      context: ./services/catalog
     ports:
       - "8001:8001"
     environment:
@@ -20,35 +20,35 @@ services:
       timeout: 5s
       retries: 3
 
-  order-service:
+  order:
     build:
-      context: ./services/order-service
+      context: ./services/order
     ports:
       - "8002:8002"
     environment:
       APP_VERSION: "v1"
       APP_PORT: "8002"
       OTLP_ENDPOINT: "http://host.docker.internal:4317"
-      PRODUCT_SERVICE_URL: "http://product-service:8001"
+      CATALOG_URL: "http://catalog:8001"
     networks:
       - eks-app
     depends_on:
-      product-service:
+      catalog:
         condition: service_healthy
 
-  api-gateway:
+  gateway:
     build:
-      context: ./services/api-gateway
+      context: ./services/gateway
     ports:
       - "8000:8000"
     environment:
       APP_VERSION: "v1"
       APP_PORT: "8000"
       OTLP_ENDPOINT: "http://host.docker.internal:4317"
-      PRODUCT_SERVICE_URL: "http://product-service:8001"
-      ORDER_SERVICE_URL: "http://order-service:8002"
+      CATALOG_URL: "http://catalog:8001"
+      ORDER_URL: "http://order:8002"
     networks:
       - eks-app
     depends_on:
-      product-service:
+      catalog:
         condition: service_healthy

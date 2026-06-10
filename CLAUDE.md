@@ -24,8 +24,8 @@ docker compose down              # 종료
 
 ### 단일 서비스 재빌드
 ```bash
-docker compose build --no-cache product-service
-docker compose up -d product-service
+docker compose build --no-cache catalog
+docker compose up -d catalog
 ```
 
 ### ECR 배포 (수동)
@@ -42,16 +42,16 @@ docker build -t $ECR:{service}-v1 services/{service}/
 docker push $ECR:{service}-v1
 
 # v2 예시
-docker build --build-arg APP_VERSION=v2 -t $ECR:product-service-v2 services/product-service/
-docker push $ECR:product-service-v2
+docker build --build-arg APP_VERSION=v2 -t $ECR:catalog-v2 services/catalog/
+docker push $ECR:catalog-v2
 ```
 
-이미지 태그 규칙: `{service-name}-{version}` (예: `product-service-v1`, `order-service-v2`)
+이미지 태그 규칙: `{service-name}-{version}` (예: `catalog-v1`, `order-v2`)
 
 ### 로컬 API 테스트
 ```bash
 curl http://localhost:8000/api/v1/products          # gateway 경유
-curl http://localhost:8001/api/v1/products          # product-service 직접
+curl http://localhost:8001/api/v1/products          # catalog 직접
 curl -X POST http://localhost:8000/api/v1/orders \
   -H "Content-Type: application/json" \
   -d '{"product_id": "prod-001", "quantity": 1}'
@@ -63,11 +63,17 @@ curl http://localhost:8001/health
 
 ### 서비스 구성
 ```
-Client → api-gateway:8000 → product-service:8001
-                          → order-service:8002 → product-service:8001 (재고 검증)
+Client → gateway:8000 → catalog:8001
+                      → order:8002 → catalog:8001 (재고 검증)
 ```
 
-서비스 간 통신: `httpx` AsyncClient. `HTTPXClientInstrumentor`가 모든 httpx 요청에 OTel trace context를 자동 주입하므로 명시적 헤더 삽입 불필요.
+| 서비스 | 포트 | 역할 |
+|---|---|---|
+| `gateway` | 8000 | 외부 진입점. 자체 비즈니스 로직 없이 `/api/v1/products`, `/api/v1/orders` 요청을 각각 catalog, order로 프록시(`_proxy()`). 헤더 필터링 후 X-Request-ID 전파. v2에서 `GZipMiddleware` 추가 |
+| `catalog` | 8001 | 상품 도메인. 인메모리 `ProductStore`로 CRUD. 다른 서비스를 호출하지 않는 leaf 서비스이며, order의 재고 검증 요청을 받음 |
+| `order` | 8002 | 주문 도메인. `POST /api/v1/orders` 시 `_verify_product()`로 catalog를 호출해 상품 존재/재고를 확인(없으면 404, 부족하면 400) 후 주문 생성. `/ready`에서도 catalog 연결 상태 확인 |
+
+서비스 간 통신: `httpx` AsyncClient. `HTTPXClientInstrumentor`가 모든 httpx 요청에 OTel trace context(`traceparent`)와 X-Request-ID(correlation_id)를 자동 전파하므로 명시적 헤더 삽입 불필요. 주문 생성 흐름(client → gateway → order → catalog)은 하나의 trace로 연결되어 분산 트레이싱 검증에 사용된다.
 
 ### 공통 모듈 패턴 (3개 서비스 동일 구조)
 
@@ -88,9 +94,9 @@ Client → api-gateway:8000 → product-service:8001
 환경변수 `APP_VERSION`으로 분기. 이미지 태그 `:v1` / `:v2` 로 분리하되 동일 코드베이스 사용.
 
 - 응답 body에 항상 `{"version": "v1", "service": "...", "data": {...}}` 구조 반환
-- product-service v2: `data`에 `discount_rate: 0.1` 추가
-- order-service v2: `data`에 `priority` 필드 포함 (v1은 제거)
-- api-gateway v2: `GZipMiddleware` 추가
+- catalog v2: `data`에 `discount_rate: 0.1` 추가
+- order v2: `data`에 `priority` 필드 포함 (v1은 제거)
+- gateway v2: `GZipMiddleware` 추가
 
 ### Observability (코드 레벨)
 
@@ -113,8 +119,8 @@ OTel Resource 태그에 `service.name`, `service.version` 포함 → Grafana Tem
 | `APP_VERSION` | `v1` | v1/v2 분기 |
 | `APP_PORT` | 서비스별 상이 | uvicorn 포트 |
 | `OTLP_ENDPOINT` | `http://localhost:4317` | OTel Collector gRPC 주소 |
-| `PRODUCT_SERVICE_URL` | `http://localhost:8001` | order-service, api-gateway에서 사용 |
-| `ORDER_SERVICE_URL` | `http://localhost:8002` | api-gateway에서 사용 |
+| `CATALOG_URL` | `http://localhost:8001` | order, gateway에서 사용 |
+| `ORDER_URL` | `http://localhost:8002` | gateway에서 사용 |
 
 ## OTel 패키지 버전 주의사항
 

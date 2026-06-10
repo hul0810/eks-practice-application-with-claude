@@ -18,6 +18,6 @@ EXPOSE 8002
 ENV APP_VERSION=v1
 ENV APP_PORT=8002
 ENV OTLP_ENDPOINT=http://localhost:4317
-ENV PRODUCT_SERVICE_URL=http://localhost:8001
+ENV CATALOG_URL=http://localhost:8001
 
 CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${APP_PORT} --timeout-graceful-shutdown 30"]

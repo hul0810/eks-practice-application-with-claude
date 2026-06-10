@@ -18,7 +18,7 @@ async def _verify_product(product_id: str, quantity: int) -> dict:
 
     async with httpx.AsyncClient(timeout=5.0) as client:
         response = await client.get(
-            f"{settings.product_service_url}/api/v1/products/{product_id}",
+            f"{settings.catalog_url}/api/v1/products/{product_id}",
             headers=headers,
         )
 

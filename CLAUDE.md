@@ -30,23 +30,31 @@ docker compose up -d catalog
 
 ### ECR 배포 (수동)
 
+서비스별로 별도 ECR 리포지토리를 사용한다 (단일 리포지토리에서 분리됨):
+
+| 서비스 (폴더) | ECR 리포지토리 |
+|---|---|
+| `gateway` | `eks-practice-api-gateway-develop` |
+| `catalog` | `eks-practice-catalog-develop` |
+| `order` | `eks-practice-order-develop` |
+
 ```bash
-ECR=891396992584.dkr.ecr.ap-northeast-2.amazonaws.com/eks-practice-msa-develop
+ECR_HOST=891396992584.dkr.ecr.ap-northeast-2.amazonaws.com
 
 # ECR 로그인
 aws ecr get-login-password --region ap-northeast-2 \
-  | docker login --username AWS --password-stdin 891396992584.dkr.ecr.ap-northeast-2.amazonaws.com
+  | docker login --username AWS --password-stdin $ECR_HOST
 
-# 빌드 & 푸시 (서비스명과 버전을 태그로 사용)
-docker build -t $ECR:{service}-v1 services/{service}/
-docker push $ECR:{service}-v1
+# 빌드 & 푸시 (버전을 태그로 사용)
+docker build -t $ECR_HOST/eks-practice-catalog-develop:v1 services/catalog/
+docker push $ECR_HOST/eks-practice-catalog-develop:v1
 
 # v2 예시
-docker build --build-arg APP_VERSION=v2 -t $ECR:catalog-v2 services/catalog/
-docker push $ECR:catalog-v2
+docker build --build-arg APP_VERSION=v2 -t $ECR_HOST/eks-practice-catalog-develop:v2 services/catalog/
+docker push $ECR_HOST/eks-practice-catalog-develop:v2
 ```
 
-이미지 태그 규칙: `{service-name}-{version}` (예: `catalog-v1`, `order-v2`)
+이미지 태그 규칙: 리포지토리는 `eks-practice-{service}-develop`, 태그는 버전 (`v1`, `v2`)
 
 ### 로컬 API 테스트
 ```bash

@@ -12,3 +12,8 @@ async def health():
 @router.get("/ready")
 async def ready():
     return {"status": "ready", "version": settings.app_version, "service": settings.service_name}
+
+
+@router.get("/version")
+async def version():
+    return {"version": settings.app_version, "service": settings.service_name}

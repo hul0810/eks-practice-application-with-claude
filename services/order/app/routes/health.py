@@ -21,3 +21,8 @@ async def ready():
     except Exception:
         from fastapi import HTTPException
         raise HTTPException(status_code=503, detail="catalog unreachable")
+
+
+@router.get("/version")
+async def version():
+    return {"version": settings.app_version, "service": settings.service_name}

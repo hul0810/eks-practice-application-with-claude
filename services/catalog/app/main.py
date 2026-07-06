@@ -1,4 +1,4 @@
-# digest 변경 감지 테스트용 재빌드 마커 (2026-07-06)
+# dev CI 워크플로우 테스트용 재빌드 마커 (2026-07-07)
 from fastapi import FastAPI
 from prometheus_fastapi_instrumentator import Instrumentator
 from .config import settings

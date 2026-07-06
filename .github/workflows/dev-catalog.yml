@@ -9,6 +9,9 @@ on:
 
 jobs:
   call:
+    permissions:
+      id-token: write
+      contents: read
     uses: ./.github/workflows/_dev-build.yml
     with:
       service: catalog

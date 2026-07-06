@@ -36,17 +36,14 @@ async def _verify_product(product_id: str, quantity: int) -> dict:
 
 
 def _serialize(order: Order) -> dict:
-    data = order.model_dump()
-    if settings.app_version != "v2":
-        data.pop("priority", None)
-    return data
+    return order.model_dump()
 
 
 @router.get("", response_model=VersionedResponse)
 async def list_orders():
     orders = order_store.list_all()
     return VersionedResponse(
-        version=settings.app_version,
+        version=settings.release_version,
         service=settings.service_name,
         data=[_serialize(o) for o in orders],
     )
@@ -58,7 +55,7 @@ async def get_order(order_id: str):
     if not order:
         raise HTTPException(status_code=404, detail=f"Order {order_id} not found")
     return VersionedResponse(
-        version=settings.app_version,
+        version=settings.release_version,
         service=settings.service_name,
         data=_serialize(order),
     )
@@ -72,12 +69,12 @@ async def create_order(body: OrderCreate):
         id=str(uuid.uuid4()),
         product_id=body.product_id,
         quantity=body.quantity,
-        priority=body.priority if settings.app_version == "v2" else "normal",
+        priority=body.priority,
     )
     created = order_store.create(order)
     logger.info("create_order", order_id=created.id, product_id=body.product_id)
     return VersionedResponse(
-        version=settings.app_version,
+        version=settings.release_version,
         service=settings.service_name,
         data=_serialize(created),
     )

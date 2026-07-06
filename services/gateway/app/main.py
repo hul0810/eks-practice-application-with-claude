@@ -7,22 +7,19 @@ from .logging_config import configure_logging
 from .middleware import CorrelationIdMiddleware, AccessLogMiddleware
 from .routes import health, products, orders
 
-configure_logging(settings.service_name, settings.app_version)
+configure_logging(settings.service_name, settings.release_version)
 
 app = FastAPI(
     title=settings.service_name,
-    version=settings.app_version,
+    version=settings.release_version,
     docs_url="/docs",
 )
 
-init_telemetry(app, settings.service_name, settings.app_version, settings.otlp_endpoint)
+init_telemetry(app, settings.service_name, settings.release_version, settings.otlp_endpoint)
 
 app.add_middleware(AccessLogMiddleware)
 app.add_middleware(CorrelationIdMiddleware)
-
-# v2에서만 GZip 압축 활성화
-if settings.app_version == "v2":
-    app.add_middleware(GZipMiddleware, minimum_size=1000)
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 Instrumentator(
     should_group_status_codes=False,

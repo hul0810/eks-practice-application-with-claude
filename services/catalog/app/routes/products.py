@@ -11,8 +11,7 @@ logger = structlog.get_logger()
 
 def _serialize(product: Product) -> dict:
     data = product.model_dump()
-    if settings.app_version == "v2":
-        data["discount_rate"] = 0.1
+    data["discount_rate"] = 0.1
     return data
 
 
@@ -21,7 +20,7 @@ async def list_products():
     products = product_store.list_all()
     logger.info("list_products", count=len(products))
     return VersionedResponse(
-        version=settings.app_version,
+        version=settings.release_version,
         service=settings.service_name,
         data=[_serialize(p) for p in products],
     )
@@ -34,7 +33,7 @@ async def get_product(product_id: str):
         raise HTTPException(status_code=404, detail=f"Product {product_id} not found")
     logger.info("get_product", product_id=product_id)
     return VersionedResponse(
-        version=settings.app_version,
+        version=settings.release_version,
         service=settings.service_name,
         data=_serialize(product),
     )
@@ -46,7 +45,7 @@ async def create_product(body: ProductCreate):
     created = product_store.create(product)
     logger.info("create_product", product_id=created.id, name=created.name)
     return VersionedResponse(
-        version=settings.app_version,
+        version=settings.release_version,
         service=settings.service_name,
         data=_serialize(created),
     )

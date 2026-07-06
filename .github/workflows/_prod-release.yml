@@ -1,0 +1,55 @@
+name: _prod-release
+
+# prod 환경 공통 빌드/push 로직 (재사용 워크플로우).
+# 호출부: prod-gateway.yml, prod-catalog.yml, prod-order.yml
+# 항상 수동(workflow_dispatch)으로만 트리거되며, 지정한 ref 시점의
+# services/{service}/app/VERSION 파일 값을 읽어 그 버전으로 태깅한다.
+# 상세 정책: docs/versioning-policy.md
+
+on:
+  workflow_call:
+    inputs:
+      service:
+        required: true
+        type: string
+      ecr_repo:
+        required: true
+        type: string
+      ref:
+        required: false
+        type: string
+        default: "main"
+      role_arn:
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - id: version
+        run: |
+          VERSION=$(cat services/${{ inputs.service }}/app/VERSION | tr -d '[:space:]')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ inputs.role_arn }}
+          aws-region: ap-northeast-2
+
+      - uses: aws-actions/amazon-ecr-login@v2
+        id: ecr-login
+
+      - name: Build & push (release version)
+        env:
+          IMAGE: ${{ steps.ecr-login.outputs.registry }}/${{ inputs.ecr_repo }}:v${{ steps.version.outputs.version }}
+        run: |
+          docker build -t "$IMAGE" services/${{ inputs.service }}/
+          docker push "$IMAGE"

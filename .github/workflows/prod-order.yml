@@ -1,0 +1,18 @@
+name: prod-order
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "빌드할 git ref (기본: main)"
+        required: false
+        default: "main"
+
+jobs:
+  call:
+    uses: ./.github/workflows/_prod-release.yml
+    with:
+      service: order
+      ecr_repo: eks-practice-order-prod
+      ref: ${{ github.event.inputs.ref }}
+      role_arn: arn:aws:iam::657231015203:role/eks-practice-order-github

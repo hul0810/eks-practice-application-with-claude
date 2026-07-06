@@ -1,0 +1,15 @@
+name: dev-order
+
+on:
+  push:
+    branches-ignore: [main]
+    paths:
+      - "services/order/**"
+
+jobs:
+  call:
+    uses: ./.github/workflows/_dev-build.yml
+    with:
+      service: order
+      ecr_repo: eks-practice-order-dev
+      role_arn: arn:aws:iam::657231015203:role/eks-practice-order-github

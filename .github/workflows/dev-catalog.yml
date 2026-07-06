@@ -1,0 +1,15 @@
+name: dev-catalog
+
+on:
+  push:
+    branches-ignore: [main]
+    paths:
+      - "services/catalog/**"
+
+jobs:
+  call:
+    uses: ./.github/workflows/_dev-build.yml
+    with:
+      service: catalog
+      ecr_repo: eks-practice-catalog-dev
+      role_arn: arn:aws:iam::657231015203:role/eks-practice-catalog-github

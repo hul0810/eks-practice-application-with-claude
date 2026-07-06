@@ -6,6 +6,7 @@ from structlog.contextvars import get_contextvars
 from ..models import Order, OrderCreate, VersionedResponse
 from ..store import order_store
 from ..config import settings
+from ..events import publish_order_created
 
 router = APIRouter()
 logger = structlog.get_logger()
@@ -73,6 +74,7 @@ async def create_order(body: OrderCreate):
     )
     created = order_store.create(order)
     logger.info("create_order", order_id=created.id, product_id=body.product_id)
+    publish_order_created(_serialize(created))
     return VersionedResponse(
         version=settings.release_version,
         service=settings.service_name,

@@ -2,7 +2,8 @@ name: _dev-build
 
 # dev 환경 공통 빌드/push 로직 (재사용 워크플로우).
 # 호출부: dev-gateway.yml, dev-catalog.yml, dev-order.yml
-# latest 태그 + 배포 브랜치명 태그, 2개를 동시에 push한다.
+# 항상 수동(workflow_dispatch)으로만 트리거되며, 지정한 ref를 빌드해서
+# latest 태그 + ref명 태그, 2개를 동시에 push한다.
 
 on:
   workflow_call:
@@ -11,6 +12,9 @@ on:
         required: true
         type: string
       ecr_repo:
+        required: true
+        type: string
+      ref:
         required: true
         type: string
       role_arn:
@@ -25,10 +29,12 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
 
       - id: tag
         run: |
-          BRANCH_TAG=$(echo "${{ github.ref_name }}" | tr '/' '-')
+          BRANCH_TAG=$(echo "${{ inputs.ref }}" | tr '/' '-')
           echo "branch_tag=$BRANCH_TAG" >> "$GITHUB_OUTPUT"
 
       - uses: aws-actions/configure-aws-credentials@v4

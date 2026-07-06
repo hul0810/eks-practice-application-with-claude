@@ -1,10 +1,11 @@
 name: dev-order
 
 on:
-  push:
-    branches-ignore: [main]
-    paths:
-      - "services/order/**"
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "빌드할 git ref (브랜치명)"
+        required: true
 
 jobs:
   call:
@@ -12,4 +13,5 @@ jobs:
     with:
       service: order
       ecr_repo: eks-practice-order-dev
+      ref: ${{ github.event.inputs.ref }}
       role_arn: arn:aws:iam::657231015203:role/eks-practice-order-github

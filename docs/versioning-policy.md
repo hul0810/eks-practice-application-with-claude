@@ -37,8 +37,8 @@ prod 배포는 **항상 수동(`workflow_dispatch`)으로만 실행**한다. PR 
 
 | 구분 | dev | prod |
 |---|---|---|
-| 트리거 | 해당 서비스 폴더에 push될 때마다 자동 | 수동(`workflow_dispatch`)만 |
-| 태그 전략 | `latest` + push된 브랜치명 2개 태그 | `VERSION` 파일 값 기반 SemVer 태그 (`v1.4.2` 등) |
+| 트리거 | 수동(`workflow_dispatch`), 빌드할 ref(브랜치명) 입력 | 수동(`workflow_dispatch`), 빌드할 ref 입력 |
+| 태그 전략 | `latest` + 입력한 ref명 2개 태그 | `VERSION` 파일 값 기반 SemVer 태그 (`v1.4.2` 등) |
 | Image Updater 전략 | digest | semver |
 | ECR 태그 불변성 | `MUTABLE` (같은 태그 재push 허용) | `IMMUTABLE` (재push 차단 예정) |
 | 변경 감지 기준 | 태그는 그대로, digest 변경 감지 | 새 버전 태그 자체가 곧 배포 트리거 |

@@ -16,6 +16,6 @@ jobs:
     uses: ./.github/workflows/_prod-release.yml
     with:
       service: gateway
-      ecr_repo: eks-practice-api-gateway-prod
+      ecr_repo: eks-practice-api-gateway
       ref: ${{ github.event.inputs.ref }}
       role_arn: "arn:aws:iam::657231015203:role/eks-practice-gateway-github"

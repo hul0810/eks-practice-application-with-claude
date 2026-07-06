@@ -16,6 +16,6 @@ jobs:
     uses: ./.github/workflows/_prod-release.yml
     with:
       service: catalog
-      ecr_repo: eks-practice-catalog-prod
+      ecr_repo: eks-practice-catalog
       ref: ${{ github.event.inputs.ref }}
       role_arn: "arn:aws:iam::657231015203:role/eks-practice-catalog-github"

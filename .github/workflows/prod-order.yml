@@ -16,6 +16,6 @@ jobs:
     uses: ./.github/workflows/_prod-release.yml
     with:
       service: order
-      ecr_repo: eks-practice-order-prod
+      ecr_repo: eks-practice-order
       ref: ${{ github.event.inputs.ref }}
       role_arn: "arn:aws:iam::657231015203:role/eks-practice-order-github"

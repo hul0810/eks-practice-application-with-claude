@@ -15,4 +15,4 @@ jobs:
       service: order
       ecr_repo: eks-practice-order-prod
       ref: ${{ github.event.inputs.ref }}
-      role_arn: arn:aws:iam::657231015203:role/eks-practice-order-github
+      role_arn: "arn:aws:iam::657231015203:role/eks-practice-order-github"

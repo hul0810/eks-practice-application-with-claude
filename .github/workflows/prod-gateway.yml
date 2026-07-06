@@ -15,4 +15,4 @@ jobs:
       service: gateway
       ecr_repo: eks-practice-api-gateway-prod
       ref: ${{ github.event.inputs.ref }}
-      role_arn: arn:aws:iam::657231015203:role/eks-practice-gateway-github
+      role_arn: "arn:aws:iam::657231015203:role/eks-practice-gateway-github"

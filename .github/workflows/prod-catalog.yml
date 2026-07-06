@@ -15,4 +15,4 @@ jobs:
       service: catalog
       ecr_repo: eks-practice-catalog-prod
       ref: ${{ github.event.inputs.ref }}
-      role_arn: arn:aws:iam::657231015203:role/eks-practice-catalog-github
+      role_arn: "arn:aws:iam::657231015203:role/eks-practice-catalog-github"
